@@ -35,7 +35,7 @@
   * [LocalDate 本地日期](#localdate)
   * [LocalDateTime 本地日期时间](#localdatetime)
 
-## 接口的默认方法
+## <span id="defaultInterfaceMethod">接口的默认方法</span>
 
 Java 8允许接口中定义默认实现方法,需要在实现方法前添加"default"关键字
 
