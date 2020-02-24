@@ -19,6 +19,6 @@ public class UserQueryResponse extends BaseResponse {
 
     @Override
     public String toString() {
-        return "userType='" + userType + '\'' +"code=";
+        return "userType='" + userType;
     }
 }

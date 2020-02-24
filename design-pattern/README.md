@@ -20,7 +20,7 @@
    * 简单工厂
    * 抽象工厂
    * 工厂方法
-* [装饰器模式](#decorate)
+* [装饰器模式](#decorator)
 * [观察者模式](#observer)
 
 ## 单例模式
@@ -657,6 +657,182 @@ public class Client {
 ```
 
 ## 装饰器模式
+> 装饰器模式是为了实现类在不修改原始类的基础上进行动态的覆盖或者增加方法,该实现保持跟原有类的层级关系
+装饰器模式一般以wrapper或者decorator结尾
 
+下面我们来实现一下:
+
+定义一个接口查询用户信息
+```java
+public interface UserService {
+    UserQueryResponse queryUser(UserQueryRequest request);
+}
+```
+实现接口类:
+```java
+public class UserServiceImpl implements UserService {
+    @Override
+    public UserQueryResponse queryUser(UserQueryRequest request) {
+        UserQueryResponse response = new UserQueryResponse();
+        response.setReturnCode("200");
+        response.setUserType("User");
+        response.setMsg(request.getRequestId());
+        return response;
+    }
+}
+```
+> 以上是一个标准的业务实现,但是如果有一天需求变了需要在查询用户之前增加用户额度查询正常情况肯定只是加一个方法
+这样的就会增加系统的复杂性,对业务的耦合度比较高
+
+接下来我们使用装饰器模式来实现 提供系统的解耦能力
+
+1.定义装饰器类
+```java
+public abstract class UserServiceWrapper implements UserService {
+
+    protected UserService userService;
+}
+```
+
+2.实现装饰器类
+```java
+public class CheckUserLimiter extends UserServiceWrapper {
+    //构造
+    public CheckUserLimiter(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Override
+    public UserQueryResponse queryUser(UserQueryRequest request) {
+        //查询用户之前进行查询用户额度
+        checkUserLimiter(request);
+        return userService.queryUser(request);
+    }
+
+    private void checkUserLimiter(UserQueryRequest request) {
+        System.out.println("检查用户额度信息,用户名=" + request.getUserId());
+    }
+}
+
+```
+3.测试类
+```java
+public class Bootstrap {
+
+    public static void main(String[] args) {
+        UserService userService = new CheckUserLimiter(new UserServiceImpl());
+        UserQueryRequest request = new UserQueryRequest();
+        request.setUserId("Peter");
+        request.setRequestId(UUID.randomUUID().toString());
+        UserQueryResponse userQueryResponse =  userService.queryUser(request);
+        System.out.println(userQueryResponse);
+    }
+}
+```
 
 ## 观察者模式
+> 观察者模式实际应用场景很多比如订阅发布 服务监听
+
+定义一个任务
+```java
+public interface Task {
+
+    void add(TaskObserver observer);
+
+    void remove(TaskObserver observer);
+
+    void notifyMessage();
+}
+```
+
+实现类:
+```java
+public class Manager implements Task {
+
+    private List<TaskObserver> observerList = new ArrayList<>();
+    private String message;
+
+    @Override
+    public void add(TaskObserver observer) {
+        observerList.add(observer);
+    }
+
+    @Override
+    public void remove(TaskObserver observer) {
+        int index = observerList.indexOf(observer);
+        if (index > 0) {
+            observerList.remove(observer);
+        }
+    }
+
+    @Override
+    public void notifyMessage() {
+        for (int i = 0; i < observerList.size(); i++) {
+            TaskObserver observer = observerList.get(i);
+            observer.update(message);
+        }
+    }
+
+    public void assignTask(String taskName) {
+        this.message = taskName;
+        System.out.println("接到任务:" + taskName);
+        this.notifyMessage();
+    }
+}
+```
+定义观察者角色:
+```java
+public interface TaskObserver {
+
+    void update(String message);
+}
+```
+
+具体实现类
+```java
+public class WorkA implements TaskObserver {
+    private Manager manager;
+    private String name;
+
+    public WorkA(Manager manager, String name) {
+        this.manager = manager;
+        this.name = name;
+        manager.add(this);
+    }
+
+    @Override
+    public void update(String message) {
+        System.out.println(name + "已收到" + message + "任务");
+    }
+}
+```
+
+```java
+public class WorkB implements TaskObserver {
+
+    private Manager manager;
+    private String name;
+
+    public WorkB(Manager manager, String name) {
+        this.manager = manager;
+        this.name = name;
+        manager.add(this);
+    }
+
+    @Override
+    public void update(String message) {
+        System.out.println(name + "已收到" + message + "任务");
+    }
+}
+```
+测试类:
+```java
+public class Client {
+    public static void main(String[] args) {
+        Manager manager = new Manager();
+        new WorkA(manager,"张三");
+        new WorkB(manager,"李四");
+        manager.assignTask("盖房子");
+    }
+}
+```
