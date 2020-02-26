@@ -12,6 +12,7 @@
     <module>java8</module>
     <module>design-pattern</module>
       <module>mybatis</module>
+      <module>maven</module>
   </modules>
 
   <name>java-tech-tutorial</name>

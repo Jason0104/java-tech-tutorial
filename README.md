@@ -24,10 +24,10 @@
     * 装饰器模式
     * 观察者模式
     * 适配器模式
-* [git从原理到实战](#git)
-* [maven](#maven)
-* [mybatis源码深入分析](#mybatis)
-* [spring源码深入分析](#spring)
-* [spring-mvc源码分析](#springmvc)
-* [mysql实战到优化](#mysql)
+* [Git从原理到实战](#git)
+* [Maven实战](#maven)
+* [Mybatis源码深入分析](#mybatis)
+* [Spring源码深入分析](#spring)
+* [Spring-mvc源码分析](#springmvc)
+* [Mysql实战到优化](#mysql)
 
