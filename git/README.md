@@ -2,13 +2,11 @@
 
 ## 主要内容介绍
 
-* [什么是Git](#what's git)
-* [Git与传统版本控制系统的比较](#compare-verson-control)
-   * CVS
-   * SVN
-* [Git安装](#install git)
-* [Git通用设置](#install git)
-* [Git提交代码原理](#commit code)
+* [什么是Git](#git)
+* [Git与传统版本控制系统的比较](#git_compare)
+* [Git安装](#git_install)
+* [Git通用设置](#git_config)
+* [Git提交代码原理](#git_code)
 * [Git分支](#git_branch)
 * [Git命令介绍](#git_command)
    * 常用的操作命令
