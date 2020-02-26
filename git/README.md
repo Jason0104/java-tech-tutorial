@@ -30,7 +30,7 @@
 
 ## Git安装
 ### 客户端Git安装
-点击http://git-scm.com/download/下载与自己操作系统的版本即可,完成安装即可.
+点击http://git-scm.com/download/  下载与自己操作系统的版本即可,完成安装即可.
 
 ### 服务器端Git安装:
 1.安装Git,执行下面命令:
