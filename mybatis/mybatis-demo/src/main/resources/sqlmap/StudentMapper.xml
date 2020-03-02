@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java.tech.mapper.StudentMapper">
+    <sql id="select_all">
+        SELECT id,name,address,createTime,updateTime
+        FROM cu_student
+    </sql>
+
+    <!-- 自定义返回结果集 -->
+    <resultMap id="studentMap" type="Student">
+        <id property="id" column="id" javaType="java.lang.Integer"></id>
+        <result property="name" column="name" javaType="java.lang.String"></result>
+        <result property="address" column="address"
+                typeHandler="com.java.tech.typeHandler.MyStringTypeHandler"></result>
+        <result property="createTime" column="createTime" javaType="java.util.Date"></result>
+        <result property="updateTime" column="updateTime" javaType="java.util.Date"></result>
+        <result property="isDeleted" column="isDeleted" javaType="java.lang.Integer"></result>
+    </resultMap>
+
+
+    <select id="queryAll" parameterType="Map" resultMap="studentMap">
+        <include refid="select_all"></include>
+    </select>
+
+    <insert id="create" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cu_student(name, address, createTime,updateTime,isDeleted)
+        VALUES(#{name},#{address},#{createTime},#{updateTime},#{isDeleted})
+    </insert>
+
+    <select id="findById" parameterType="Map" resultType="Student">
+        <include refid="select_all"></include>
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="Student">
+        UPDATE cu_student
+        SET name=#{name},address=#{address}
+        WHERE id=#{id}
+    </update>
+
+    <update id="delete" parameterType="Map">
+        UPDATE cu_student
+        SET isDeleted=1
+        WHERE id=#{id}
+    </update>
+
+</mapper>

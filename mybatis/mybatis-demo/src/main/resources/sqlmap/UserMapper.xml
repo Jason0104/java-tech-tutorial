@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java.tech.mapper.UserMapper">
+    <sql id="select_all">
+        SELECT id,username,address,mobile
+        FROM cu_user
+    </sql>
+
+    <!-- 自定义返回结果集 -->
+    <resultMap id="userMap" type="User">
+        <id property="id" column="id" javaType="java.lang.Integer"></id>
+        <result property="username" column="username" javaType="java.lang.String"></result>
+        <result property="address" column="address" javaType="java.lang.String"></result>
+        <result property="mobile" column="mobile" javaType="java.lang.String"></result>
+        <result property="isDeleted" column="isDeleted" javaType="java.lang.Integer"></result>
+    </resultMap>
+
+
+    <insert id="create" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cu_user(username, address, mobile,isDeleted) VALUES(#{username},#{address},#{mobile},#{isDeleted})
+    </insert>
+
+    <select id="findById" parameterType="Map" resultType="User">
+        <include refid="select_all"></include>
+        WHERE id = #{id}
+    </select>
+
+    <update id="update" parameterType="User">
+        UPDATE cu_user
+        SET username=#{username},address=#{address},mobile=#{mobile}
+        WHERE id=#{id}
+    </update>
+
+    <update id="delete" parameterType="Map">
+        UPDATE cu_user
+        SET isDeleted=1
+        WHERE id=#{id}
+    </update>
+
+    <select id="queryByMobile" parameterType="Map" resultType="User">
+        <include refid="select_all"></include>
+        WHERE mobile=#{mobile}
+    </select>
+
+    <select id="queryUserByName" resultMap="userMap">
+        <include refid="select_all"></include>
+        WHERE username like #{username}
+    </select>
+
+    <select id="queryUserList" resultType="User">
+        <include refid="select_all"></include>
+        WHERE username in
+        <foreach collection="userlist" item="username" index="index" open="(" separator="," close=")">
+            #{username}
+        </foreach>
+    </select>
+
+</mapper>

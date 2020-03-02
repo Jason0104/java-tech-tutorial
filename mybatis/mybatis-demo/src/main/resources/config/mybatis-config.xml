@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <properties resource="db.properties"/>
+
+    <typeAliases>
+        <typeAlias alias="User" type="com.java.tech.entity.User"/>
+        <typeAlias alias="Student" type="com.java.tech.entity.Student"/>
+        <typeAlias alias="Hobby" type="com.java.tech.entity.Hobby"/>
+    </typeAliases>
+
+    <typeHandlers>
+        <typeHandler handler="com.java.tech.typeHandler.MyStringTypeHandler" javaType="string" jdbcType="VARCHAR"/>
+        <typeHandler handler="com.java.tech.typeHandler.List2StringTypeHandler" javaType="list" jdbcType="VARCHAR"/>
+    </typeHandlers>
+
+
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driverName}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <mapper resource="sqlmap/UserMapper.xml"/>
+        <mapper resource="sqlmap/StudentMapper.xml"/>
+        <mapper resource="sqlmap/HobbyMapper.xml"/>
+    </mappers>
+</configuration>

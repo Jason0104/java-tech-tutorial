@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java.tech.mapper.RoleMapper">
+    <sql id="select_all">
+        SELECT id,name
+        FROM cu_role
+    </sql>
+
+    <insert id="create" parameterType="Role" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cu_role(name) VALUES(#{name})
+    </insert>
+
+    <select id="findById" parameterType="Map" resultType="Role">
+        <include refid="select_all"></include>
+        WHERE id = #{id}
+    </select>
+
+</mapper>
