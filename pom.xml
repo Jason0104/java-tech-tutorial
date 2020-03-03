@@ -15,6 +15,7 @@
         <module>mybatis</module>
         <module>maven</module>
         <module>spring</module>
+        <module>springmvc</module>
     </modules>
 
     <name>java-tech-tutorial</name>

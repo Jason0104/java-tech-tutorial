@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.java.tech"/>
+
+    <bean id="helloService" class="com.java.tech.impl.HelloServiceImpl"/>
+
+
+    <bean id="shoppingCart" class="com.java.tech.model.ShoppingCart">
+        <!--注入list-->
+        <property name="fruits">
+            <list>
+                <value>apple</value>
+                <value>pear</value>
+                <value>orange</value>
+            </list>
+        </property>
+        <!--注入string-->
+        <property name="name">
+            <value>fruit name list</value>
+        </property>
+
+        <!--注入map-->
+        <property name="basicInfo">
+            <map>
+                <entry key="member" value-ref="member"></entry>
+                <entry key="vip" value-ref="vip"></entry>
+                <entry key="superVIP" value-ref="superVIP"></entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="member" class="com.java.tech.model.Customer">
+        <property name="name" value="member"/>
+        <property name="address" value="shanghai"/>
+        <property name="mobile" value="18701705689"/>
+    </bean>
+
+    <bean id="vip" class="com.java.tech.model.Customer">
+        <property name="name" value="vip"/>
+        <property name="address" value="nanjing"/>
+        <property name="mobile" value="18701705688"/>
+    </bean>
+
+    <bean id="superVIP" class="com.java.tech.model.Customer">
+        <property name="name" value="superVIP"/>
+        <property name="address" value="shanghai"/>
+        <property name="mobile" value="18701705655"/>
+    </bean>
+
+</beans>
