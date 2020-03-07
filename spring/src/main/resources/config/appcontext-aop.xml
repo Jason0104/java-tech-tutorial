@@ -15,5 +15,8 @@
     <!--开启aop注解-->
     <aop:aspectj-autoproxy proxy-target-class="true"/>
 
+    <!--开启aspectj代理-->
+    <aop:aspectj-autoproxy expose-proxy="true"/>
+
 
 </beans>

@@ -12,6 +12,14 @@
 
     <bean id="helloService" class="com.java.tech.impl.HelloServiceImpl"/>
 
+    <bean id="order" class="com.java.tech.model.Order">
+        <property name="orderId">
+            <value>20200306210900</value>
+        </property>
+        <property name="orderName">
+            <value>香水</value>
+        </property>
+    </bean>
 
     <bean id="shoppingCart" class="com.java.tech.model.ShoppingCart">
         <!--注入list-->

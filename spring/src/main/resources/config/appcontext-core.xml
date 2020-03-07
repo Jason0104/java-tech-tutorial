@@ -10,4 +10,6 @@
 
     <context:component-scan base-package="com.java.tech"/>
 
+    <bean id="serviceTemplate" class="com.java.tech.service.ServiceTemplate"/>
+
 </beans>

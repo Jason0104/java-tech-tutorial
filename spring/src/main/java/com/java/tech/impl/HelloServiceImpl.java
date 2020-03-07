@@ -3,9 +3,6 @@ package com.java.tech.impl;
 import com.java.tech.service.HelloService;
 import org.springframework.stereotype.Service;
 
-/**
- * created by Jason on 2020/3/3
- */
 @Service
 public class HelloServiceImpl implements HelloService {
     @Override

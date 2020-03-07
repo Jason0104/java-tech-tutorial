@@ -12,6 +12,7 @@
 * [Maven常用命令](#maven_commands)
 * [Maven插件介绍](#maven_middleware)
 * [Maven仓库](#maven_repo)
+* [Profile的使用](#maven_profile)
 * [聚合和继承](#maven_inherit)
 * [Jenkins环境搭建](#jenkins)
 
@@ -405,6 +406,77 @@ export RUN_AS_USER=root
 - indexer:存放索引文件,私服页面看到的jar都是通过索引去storage搜索的
 - storage:jar包存储文件
 - logs: 存放日志文件
+
+## Profile的使用
+> Profile所解决的问题是在不同的环境开发,比如开发环境，测试环境,生产环境,项目的配置可能会不一样，比如数据源配置、日志文件配置、以及一些软件运行过程中的基本配置
+每次将软件部署到不同的环境时，都需要修改相应的配置文件，这样来回修改，很容易出错，而且浪费劳动力.
+  
+一般在pom.xml中配置
+```shell script
+ <profiles>
+        <profile>
+            <!-- profileId 代表唯一-->
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+            <activation>
+                <!-- 默认激活该profile节点-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources/dev</directory>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <!-- 测试环境 -->
+            <id>qa</id>
+            <properties>
+                <env>qa</env>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources/qa</directory>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <!-- 生产环境 -->
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources/prod</directory>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+```
+
+#### 通过maven命令参数指定环境打包
+maven打包时通过-P参数 -P后面跟上profile id
+```shell script
+mvn clean install -Pdev
+```
 
 ## 聚合和继承
 > Maven的聚合特性能够把项目的各个模块聚合在一起构建,而Maven的继承特性则能帮助抽取各模块相同的依赖和插件等配置

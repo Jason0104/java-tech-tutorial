@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 
 /**
  * created by Jason on 2020/3/3
+ * <p>
+ * 简单aop例子
  */
 @Aspect
 @Component
@@ -19,17 +21,19 @@ public class LogAspect {
 
     @Pointcut("@annotation(com.java.tech.aop.MyLog)")
     public void annotationPointCut() {
-        System.out.println("annotationPointCut");
+
     }
 
+    //后置通知
     @After("annotationPointCut()")
     public void after(JoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         Method method = methodSignature.getMethod();
         MyLog myLog = method.getAnnotation(MyLog.class);
-        System.out.println("注解日志等级:" + myLog.value());
+        System.out.println("注解日志等级为:" + myLog.value());
     }
 
+    //com.java.tech.impl包及子包下面的所有类的任何方法
     @Before("execution(* com.java.tech.impl..*.*(..))")
     public void before(JoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();

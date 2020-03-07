@@ -6,7 +6,7 @@
 * [AOP的实现](#spring-aop)
 * [Spring-JDBC](#spring-jdbc)
 * [Spring事务处理](#spring-transManager)
-* [Spring远端调用的实现](#spring-remote)
+* [Spring事务处理案例介绍](#spring-transManager-sample)
 
 ## Spring介绍(https://spring.io/)
 > Spring为开发者提供了一站式的轻量级应用开发平台,面向接口开发,为企业级应用开发奠定了基础
@@ -29,7 +29,7 @@ public XmlBeanFactory(Resource resource, BeanFactory parentBeanFactory) throws B
 		this.reader.loadBeanDefinitions(resource);
 	}
 ```
-真正读取在xml配置的bean是通过org.springframework.beans.factory.xml.XmlBeanDefinitionReader来实现的
+真正读取xml配置的bean是通过org.springframework.beans.factory.xml.XmlBeanDefinitionReader来实现的
 
 - ApplicationContext:由多个实现类比如FileSystemXmlApplicationContext,ClassPathXmlApplicationContext,AnnotationConfigApplicationContext
 下面我们以ClassPathXmlApplicationContext为例子来分析源码的实现:
@@ -41,8 +41,8 @@ public ClassPathXmlApplicationContext(
 		super(parent);
 		setConfigLocations(configLocations);
 		if (refresh) {
-			//进入refresh会涉及IOC启动的复杂的流程 这也是IOC的入口
-            refresh();
+		//进入refresh会涉及IOC启动的复杂的流程 这也是IOC的入口
+                refresh();
 		}
 	}
 ```
@@ -814,6 +814,22 @@ AOP有几个非常重要的概念:
 - Aspect切面:表示PointCut(切入点)和Advice(通知)的结合
 - AOP代理(AOP Proxy):AOP框架创建的对象,代理就是目标对象的加强
 
+## AspectJ支持
+@AspectJ是一种使用Java注解来实现AOP的编码风格
+
+### 使用Java Configuration来支持@AspectJ
+```shell script
+@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
+}
+```
+
+### 使用XML方式
+```shell script
+<aop:aspectj-autoproxy/>
+```
+
 ### AOP使用场景
 - 权限
 - 缓存
@@ -821,7 +837,7 @@ AOP有几个非常重要的概念:
 - 错误处理
 - 事务
 
-#### AOP的设计与实现
+#### AOP的设计与实现原理
 AOP的设计与实现是基于JDK动态代理的技术
 
 建立AopProxy代理对象是通过ProxyFactoryBean来生成AopProxy代理对象
@@ -937,7 +953,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MyLog {
-
     String value() default "";
 }
 ```
@@ -1012,7 +1027,7 @@ public class AopTest extends AbstractSpringContextTest {
 }
 ```
 
-AOP入口代码AopNamespaceHandler
+AOP入口代码AopNamespaceHandler来进行解析
 ```shell script
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	@Override
@@ -1039,14 +1054,486 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	}
 }
 ```
+# AOP使用场景
+## 需求2:方法调用日志
+假设我们有这样一个需求:
+- 记录某个方法调用需要有日志,记录调用的参数和结果
+- 当方法调用抛出异常时,有特殊处理,比如打印异常日志和报警
+
+代码部分参考项目spring/aop文件夹
+
+## 需求3:服务监控
+- 为服务中的每个方法调用进行调用耗时记录.
+- 将方法调用的时间戳, 方法名, 调用耗时上报到监控平台
+
+代码部分参考项目spring/aop文件夹
+
+## AOP表达的使用
+1.execution用于匹配方法执行的连接点,使用例子如下:
+```shell script
+   @Before("execution(* com.java.tech.impl..*.*(..))")
+    public void before(JoinPoint joinPoint) {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        System.out.println("方法名称:" + method.getName());
+    }
+```
+下面详细解释一下参数:
+execution(<修饰符模式>?<返回类型模式><方法名模式>(<参数模式>)<异常模式>?)
+- execution(),表达式的主体
+- 第一个* 表示返回值类型任意
+- com.java.tech.impl, aop所切的服务的包名,就是我们的业务部分
+- 包名后面的..,表示当前包及子包
+- 第二个*,表示类名,*即所有类
+- .*(..),表示任何方法名,括号表示参数，两个点表示任何参数类型
+
+
+2.用于匹配指定类型的方法执行,within的使用
+匹配指定包中所有方法,但不包括子包
+```shell script
+within(com.java.tech.service.*)
+```
+匹配指定包中所有方法,但包括子包
+```shell script
+within(com.java.tech.service..*)
+```
+匹配当前包中的指定类中的方法
+```shell script
+within(logService)
+```
 
 ## Spring-JDBC
+在JDBC中, JdbcTemplate是一个主要的模版类,从继承关系可以看出JdbcTemplate继承了基类JdbcAccessor和
+接口类JdbcOperation
 
+- 在基类JdbcAccessor的设计中,对DataSource数据源进行管理和配置
+- 在JdbcOperations接口中定义了通过JDBC操作数据库的基本操作方法,比如execute,query,update
+
+```java
+public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
+    
+}
+```
+
+下面我们来一个例子介绍一下JdbcTemplate如何使用
+1.引入相关jar
+```shell script
+  <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+    </dependencies>
+```
+2.在appcontext-dal.xml中配置jdbcTemplate
+```shell script
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+```
+3.定义一个接口
+```shell script
+public interface UserService {
+
+    User queryUser(String sql);
+}
+```
+
+4.定义实现类
+```shell script
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private JdbcTemplate userTemplate;
+
+    @Override
+    public User queryUser(String sql) {
+        return userTemplate.queryForObject(sql,new UserRowMapper());
+    }
+}
+```
+
+5.编写测试类
+```shell script
+public class UserServiceTest extends AbstractSpringContextTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    public void testQueryUser() {
+        String sql = "select * from cu_user where id=1";
+        User user = userService.queryUser(sql);
+        System.out.println(user);
+    }
+}
+```
+更多的详细代码请参考项目spring/jdbc文件夹
 
 ## Spring事务处理
+> Spring可以支持编程式事务和声明式事务
+- 编程式事务:通过编写代码实现事务管理,包括定义事务的开始,程序正常执行后的事务提交,异常时进行的事务回滚,缺点是对业务代码有入侵
+- 基于AOP技术实现的声明式事务管理 @Transactional, 缺点是只能作用到方法级别,无法做到控制代码块级别
+
+## 编程式事务管理
+编程式事务管理接口PlatformTransactionManager实现如下:
+```shell script
+public interface PlatformTransactionManager extends TransactionManager {
+
+	TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+			throws TransactionException;
+	void commit(TransactionStatus status) throws TransactionException;
+	void rollback(TransactionStatus status) throws TransactionException;
+}
+```
+它的实现类是DataSourceTransactionManager
+
+如何配置:
+```shell script
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+```
+
+## 声明式事务管理
+> 在编程的事务管理中,需要手动的去修改业务层代码,对代码的侵入性比较高,声明事务管理是基于AOP技术实现,主要思想是将事务管理作为切面代码
+单独编写,只关心核心业务逻辑代码
+
+```shell script
+ <!--声明事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务模版 transactionTemplate-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!--开启注解驱动的事务管理-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+```
+哪个类需要使用事务管理,就在那个类中加@Transactional注解即可
+
+## 什么是事务
+> 事务就是把一系列的动作当成一个独立的工作单元,这些动作要么全部完成,要么全部不起作用,就是把一系列的操作当成原子性去执行
+
+## 事务的四大特性ACID:
+- A(原子性)
+- C(一致性)
+- I(隔离性)
+- D(持久性)
+
+## 事务的传播行为和隔离级别
+### 事务的传播行为:
+- REQUIRED:如果有事务在运行,当前的方法就在这个事务内运行,否则就开启一个新的事务,并在自己的事务内运行,是默认的传播行为
+- REQUIRED_NEW:当前方法必须启动新事务,并在自己的事务内运行,如果有事务正在运行,则将它挂起
+- SUPPORTS:如果有事务在运行,当前的方法就在这个事务内运行
+- NOT_SUPPORTS:表示该方法不应该运行在事务中,如果存在当前事务,在该方法运行期间,当前事务被挂起
+- MANDATORY:当前的方法必须运行在事务内部,如果没有正在运行的事务,就会抛出异常
+- NEVER:当前方法不应该运行在事务中,如果有运行的事务就抛出异常
+- NESTED:如果有事务在运行,当前的方法就应该在这个事务的嵌套事务内运行
+
+### 事务的隔离级别:
+- READ_UNCOMMITED:允许事务读取未被其他事务提交的更改,脏读 不可重复读 幻读都可能出现
+- READ_COMMITED:只允许事务读取已经被其他事务提交的更改,可以避免脏读,但不可重复读和幻读问题仍然出现
+- REPEATABLE_READ:可重复读
+- SERIALIZABLE:序列化 是事务隔离级别最高,但是性能比较低
 
 
-## Spring远程调用的实现
+spring是通过TransactionTemplate事务模版来实现事务
+
+**说明由于代码比较多 部分代码省略更多详细请参考项目**
+1.配置transactionTemplate
+```shell script
+<!--声明事务管理-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置transactionTemplate-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+```
+
+2.定义接口
+```shell script
+public interface UserService {
+
+    User queryUser(String sql);
+
+    List<User> queryList(String param);
+}
+```
+
+3.实现接口
+```shell script
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private JdbcTemplate userTemplate;
+
+    @Override
+    public User queryUser(String sql) {
+        return userTemplate.queryForObject(sql, new UserRowMapper());
+    }
+
+    @Override
+    public List<User> queryList(String param) {
+        return userTemplate.query(param, new UserRowMapper());
+    }
+}
+```
+
+4.编写测试代码
+```shell script
+public class TransactionTemplateServiceTest extends AbstractSpringContextTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Test
+    public void testTransaction() {
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                String sql = "select * from cu_user where id=1";
+                userService.queryUser(sql);
+            }
+        });
+
+        transactionTemplate.execute(new TransactionCallback<List<User>>() {
+
+            @Override
+            public List<User> doInTransaction(TransactionStatus status) {
+                String sql = "select * from cu_user";
+                return userService.queryList(sql);
+            }
+        });
+    }
+}
+```
+
+## Spring事务处理案例介绍
+> 背景介绍:我们主要是做一个简单的转账业务
+
+**特别说明一下 这块代码考虑到实际项目当中的设计 部分代码就没有贴了 详细代码可去项目当中查看**
+
+1.先设计一个简单的转账模型类
+```shell script
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Account extends BaseModel {
+
+    private String sender;
+    private String receiver;
+    private Double amount;
+}
+```
+
+2.定义一个接口类
+```shell script
+public interface AccountService {
+
+    AccountResponse transfer(AccountRequest request);
+}
+```
+
+3.定义一个实现类
+```shell script
+@Service
+public class AccountServiceImpl implements AccountService {
+
+    @Autowired
+    private AccountDao accountDao;
+
+    @Override
+    public AccountResponse transfer(AccountRequest account) {
+        return ServiceTemplate.execute(account, new ServiceCallBack<AccountRequest, AccountResponse>() {
+            @Override
+            public void checkParameter(AccountRequest request) {
+                System.out.println("开始进入账户校验");
+            }
+
+            @Override
+            public AccountResponse process(AccountRequest request) {
+                System.out.println("开始进入转账流程");
+
+                //转出
+                accountDao.cashOut(account.getAccount().getSender(), account.getAccount().getAmount());
+                
+                //故意制造异常,会导致金额已经转出 但是没有转入到收款方
+                int i = 1/0;
+               
+                //转入
+                accountDao.cashIn(account.getAccount().getReceiver(), account.getAccount().getAmount());
+
+                //如果返回true代表成功
+                return AccountResponse.builder().success(true).build();
+            }
+
+            @Override
+            public AccountResponse fillFailedResult(AccountRequest request, String message) {
+                //转账失败的业务处理 回滚操作
+                System.out.println("转账失败 进入回滚,异常信息为:" + message);
+                return null;
+            }
+
+            @Override
+            public void afterProcess() {
+
+            }
+        });
+
+    }
+}
+```
+
+4.编写测试类
+```shell script
+public class AccountServiceTest extends AbstractSpringContextTest {
+
+    @Autowired
+    private AccountService accountService;
+
+    @Test
+    public void testTransfer(){
+        //转出方 张三转账500给李四
+        Account transfer = Account.builder().sender("张三").receiver("李四").amount(500.00).build();
+        //构建转账请求
+        AccountRequest transferRequest = AccountRequest.builder().account(transfer).build();
+
+        AccountResponse accountResponse = accountService.transfer(transferRequest);
+        System.out.println(accountResponse);
+    }
+}
+```
+**当执行完成以后会发现表中的数据张三少了500块钱,但是李四并没有增加500元,这里是因为没有引入事务管理机制**
+
+## 1.引入编程式事务管理
+1.在appcontext-dal.xml中配置
+```shell script
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+    <context:property-placeholder location="classpath*:db.properties"/>
+
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务模版 transactionTemplate-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!--开启注解驱动的事务管理-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
+```
+
+2.需要修改业务代码,需要使用transactionTemplate
+```shell script
+@Service
+public class AccountServiceImpl implements AccountService {
+
+    @Autowired
+    private AccountDao accountDao;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Override
+    public AccountResponse transfer(AccountRequest account) {
+        return ServiceTemplate.execute(account, new ServiceCallBack<AccountRequest, AccountResponse>() {
+            @Override
+            public void checkParameter(AccountRequest request) {
+                System.out.println("开始进入账户校验");
+            }
+
+            @Override
+            public AccountResponse process(AccountRequest request) {
+                System.out.println("开始进入转账流程");
+
+                //将转账操作放入到transactionTemplate中执行
+                transactionTemplate.execute(new TransactionCallback<AccountResponse>() {
+                    @Override
+                    public AccountResponse doInTransaction(TransactionStatus status) {
+                        //转出
+                        accountDao.cashOut(account.getAccount().getSender(), account.getAccount().getAmount());
+
+                        //故意制造异常,转出成功 转入失败 就会回滚 转出金额不变
+                        int i = 1 / 0;
+                        //转入
+                        accountDao.cashIn(account.getAccount().getReceiver(), account.getAccount().getAmount());
+                        return AccountResponse.builder().success(true).build();
+                    }
+                });
+                return null;
+              
+            }
+
+            @Override
+            public AccountResponse fillFailedResult(AccountRequest request, String message) {
+                //转账失败的业务处理 回滚操作
+                System.out.println("转账失败 进入回滚,异常信息为:" + message);
+                return null;
+            }
+
+            @Override
+            public void afterProcess() {
+
+            }
+        });
+
+    }
+}
+```
+3.再次进行单元测试,发现当发生异常的时候,发生了回滚,转出账户和转入账户数据不变
 
 
+## 2.声明式事务管理
+编程式事务管理有一个缺点就是需要修改业务的代码,对业务入侵比较严重,使用非常简单只需要在对应的方法加上@Transactional
 
