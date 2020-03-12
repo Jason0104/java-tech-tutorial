@@ -35,6 +35,7 @@
         <log4j.version>1.2.17</log4j.version>
         <slf4j.version>1.7.25</slf4j.version>
         <aspect.version>1.9.4</aspect.version>
+        <servlet.api>4.0.1</servlet.api>
     </properties>
 
     <dependencyManagement>
@@ -72,7 +73,12 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-mvc</artifactId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
@@ -86,6 +92,14 @@
                 <version>${spring.version}</version>
             </dependency>
             <!--spring-->
+
+            <!--servlet-api-->
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet.api}</version>
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.aspectj</groupId>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.java.tech"/>
+
+    <bean id="getBeanNameByAware" class="com.java.tech.aware.GetBeanNameByAware"/>
+
+    <bean id="springContainer" class="com.java.tech.aware.SpringContainer"/>
+
+    <bean id="cloudEngine" class="com.java.tech.aware.CloudEngine"/>
+
+    <bean id="merchant" class="com.java.tech.model.Merchant">
+        <property name="name" value="zhansan"/>
+        <property name="address" value="nanjing"/>
+    </bean>
+
+    <bean id="operator" class="com.java.tech.model.Operator">
+        <property name="name" value="lisi"/>
+        <property name="address" value="shanghai"/>
+    </bean>
+
+
+</beans>

@@ -219,6 +219,11 @@ mvn -T 1C clean install
 mvn clean compile -X
 ```
 
+使用maven来启动tomcat项目
+```shell script
+mvn tomcat:run
+```
+
 ## Maven插件介绍
 在介绍maven插件之前先解释几个概念
 - Phase: 可以理解为任务单元,lifecycle是总任务,phase就是总任务分出来的一个个子任务 执行phase实际执行的是goal,如果一个phase没有绑定，那么phase就不会被执行,一个lifecycle可以包含任意个phase,phase的执行是按顺序的，一个phase可以绑定很多个goal,至少为一个,没有goal的phase是没有意义的

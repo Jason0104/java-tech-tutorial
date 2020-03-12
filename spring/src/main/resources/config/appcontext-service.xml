@@ -11,6 +11,9 @@
     <context:component-scan base-package="com.java.tech"/>
 
     <bean id="helloService" class="com.java.tech.impl.HelloServiceImpl"/>
+    <bean id="echoService" class="com.java.tech.impl.EchoServiceImpl"/>
+    <bean id="accountService" class="com.java.tech.impl.AccountServiceImpl"/>
+
 
     <bean id="order" class="com.java.tech.model.Order">
         <property name="orderId">

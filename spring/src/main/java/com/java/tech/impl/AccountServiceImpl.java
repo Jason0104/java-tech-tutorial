@@ -108,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
                         //每次创建账户的时候 往用户表中插入一条记录
                         accountDao.addAccount(request.getAccount().getSender(), request.getAccount().getAmount());
                         //故意制造异常
-                        int i = 2 / 0;
+//                        int i = 2 / 0;
                         userDao.addUser(buildUserRequest(request));
                         return AccountResponse.builder().success(true).build();
                     }

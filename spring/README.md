@@ -801,6 +801,105 @@ public class ShoppingCartTest {
 }
 ```
 
+## ApplicationContextAware,DisposableBean和InitializingBean的用法
+InitializingBean:表示在初始化bean之前执行的方法,用于设置bean的属性配置,类似BeanFactoryAware,BeanNameAware和ApplicationContextAware
+```shell script
+public interface InitializingBean {
+	void afterPropertiesSet() throws Exception;
+}
+```
+
+DisposableBean:就是在bean被销毁的时候,spring容器会帮你自动执行该方法,对于使用完以后需要释放资源的bean都会实现这个接口
+```shell script
+public interface DisposableBean {
+
+	/**
+	 * Invoked by the containing {@code BeanFactory} on destruction of a bean.
+	 * @throws Exception in case of shutdown errors. Exceptions will get logged
+	 * but not rethrown to allow other beans to release their resources as well.
+	 */
+	void destroy() throws Exception;
+}
+```
+
+ApplicationContextAware:在容器初始化的过程中将bean属性注入,与InitializingBean的区别是ApplicationContextAware当容器初始化的时候
+会自动将ApplicationContextAware注入进来,我们可以通过注入进来的applicationContext来获取bean对象,Spring Aware的目的是让Bean获得容器的服务。
+
+**spring源码中接口以Aware结尾的接口表示如果在某个类里面想要使用Spring就可以实现该接口告诉spring**
+- BeanNameAware:在Bean中得到IOC容器中的Bean的实例名字
+- BeanFactoryAware:在Bean中获得所在的IOC容器
+- ApplicationContextAware:在Bean中得到Bean所在的应用上下文
+- MessageSourceAware:在Bean中得到消息源
+- ResourceLoaderAware:在Bean中得到ResourceLoader
+
+```shell script
+public interface ApplicationContextAware extends Aware {
+
+	void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
+
+}
+`````
+如何应用,下面来举一个例子
+ApplicationContextAware在实际中作为一个组件,一个类如果实现该接口表示你可以从spring容器获取bean
+```shell script
+public class SpringContainer implements ApplicationContextAware {
+    private static ApplicationContext applicationContext = null;
+
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        if (SpringContainer.applicationContext == null) {
+            SpringContainer.applicationContext = applicationContext;
+        }
+    }
+
+    public static Object getBean(String name) {
+        return getApplicationContext().getBean(name);
+    }
+
+    public static <T> T getBean(String name, Class<T> clazz) {
+        return getApplicationContext().getBean(name, clazz);
+    }
+
+    public static <T> T getBean(Class<T> clazz) {
+        return getApplicationContext().getBean(clazz);
+    }
+}
+```
+
+然后编写测试类
+```shell script
+public class SpringContainerTest extends AbstractSpringContextTest {
+
+    @Test
+    public void testGetBeanName() {
+        AccountService accountService = (AccountService) SpringContainer.getBean("accountService");
+        accountService.create(buildAccountParam());
+    }
+
+    @Test
+    public void testGetBeanByClassName(){
+        EchoService echoService = SpringContainer.getBean("echoService", EchoService.class);
+        String result = echoService.echo("Peter");
+        System.out.println(result);
+    }
+
+    @Test
+    public void testGetBean(){
+        HelloService helloService = SpringContainer.getBean(HelloServiceImpl.class);
+        String message =  helloService.sayHello("lucy");
+        System.out.println(message);
+    }
+
+    private AccountRequest buildAccountParam() {
+        return AccountRequest.builder().account(Account.builder().sender("lucy").receiver("lili").amount(2000.00).build()).build();
+    }
+}
+```
+
 ## AOP的实现
 #### 什么是AOP
 >AOP(Aspect Oriented Programming)面向切面的编程,在程序开发中主要用来解决一些系统层面上的问题,比如日志,事务和权限

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 /**
  * created by Jason on 2020/3/2
  */
-@Service
 public class EchoServiceImpl implements EchoService {
     @MyLog(value = "info")
     @Override
