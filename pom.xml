@@ -36,6 +36,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <aspect.version>1.9.4</aspect.version>
         <servlet.api>4.0.1</servlet.api>
+        <commons-lang.version>3.8</commons-lang.version>
     </properties>
 
     <dependencyManagement>
@@ -162,6 +163,11 @@
                 <groupId>org.apache.maven.plugin-tools</groupId>
                 <artifactId>maven-plugin-annotations</artifactId>
                 <version>${maven-plugin-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

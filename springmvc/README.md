@@ -710,3 +710,55 @@ org.springframework.web.servlet.view.InternalResourceView实现如下:
 ```
 
 ## 手写SpringMVC框架
+> 开始写springmvc框架之前我们先来梳理一下思路,把大的框架先建立起来。
+
+下面我们所有的类的命名为防止冲突都是以DF开头
+1.引入相关maven依赖
+```shell script
+<dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
+```
+
+2.创建HttpServletBean
+```shell script
+
+```
+
+3.创建FrameworkServlet
+```shell script
+
+```
+
+4.创建DispatcherServlet
+```shell script
+
+```
+
+5.创建相关注解类
+
+6.创建HandlerMethod,用于存储请求方法对应的对象
+
