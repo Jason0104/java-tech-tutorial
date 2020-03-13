@@ -745,12 +745,32 @@ org.springframework.web.servlet.view.InternalResourceView实现如下:
 
 2.创建HttpServletBean
 ```shell script
-
+public abstract class DFHttpServletBean extends HttpServlet {
+    @Override
+    public void init() throws ServletException {
+        initServletBean();
+    }
+    //定义一个抽象方法 这里使用模版方法模式
+    protected abstract void initServletBean();
+}
 ```
 
 3.创建FrameworkServlet
 ```shell script
+public abstract class DFrameworkServlet extends DFHttpServletBean {
 
+    @Override
+    protected void initServletBean() {
+        onRefresh();
+    }
+    protected abstract void onRefresh();
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp);
+    }
+    protected abstract void doService(HttpServletRequest request, HttpServletResponse response);
+}
 ```
 
 4.创建DispatcherServlet
@@ -759,6 +779,51 @@ org.springframework.web.servlet.view.InternalResourceView实现如下:
 ```
 
 5.创建相关注解类
+```shell script
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DFComponentScan {
+    String value() default "";
+}
+```
+
+```shell script
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DFController {
+}
+```
+
+```shell script
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface DFRequestMapping {
+
+    String value() default "";
+}
+```
 
 6.创建HandlerMethod,用于存储请求方法对应的对象
+```shell script
+public class DFHandlerMethod {
 
+    private final Object bean;
+    private final Method method;
+
+    public DFHandlerMethod(Object bean, Method method) {
+        this.bean = bean;
+        this.method = method;
+    }
+
+    public Object getBean() {
+        return bean;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+}
+```
