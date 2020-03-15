@@ -15,7 +15,7 @@ M代表Model模型层, V代表View视图层,C代表Control控制层
 ## 简单Demo
 #### 下面我们来重点介绍一下一个完整的springmvc的例子
 
-1.引入相关依赖
+1.引入相关依赖,具体版本因为采用了聚合和继承 可以去父pom中查看
 ```shell script
  <dependencies>
         <dependency>
@@ -713,7 +713,7 @@ org.springframework.web.servlet.view.InternalResourceView实现如下:
 > 开始写springmvc框架之前我们先来梳理一下思路,把大的框架先建立起来。
 
 下面我们所有的类的命名为防止冲突都是以DF开头
-1.引入相关maven依赖
+1.引入相关maven依赖,具体版本因为采用了聚合和继承 可以去父pom中查看
 ```shell script
 <dependencies>
         <dependency>
@@ -775,10 +775,82 @@ public abstract class DFrameworkServlet extends DFHttpServletBean {
 
 4.创建DispatcherServlet
 ```shell script
+public class DFDispatcherServlet extends DFrameworkServlet {
 
+    private DFRequestMappingInfoHandlerMapping requestMappingInfoHandlerMapping;
+
+    public DFDispatcherServlet() {
+        this.requestMappingInfoHandlerMapping = new DFRequestMappingInfoHandlerMapping();
+    }
+
+    @Override
+    protected void onRefresh() {
+        initStrategies();
+    }
+
+    private void initStrategies() {
+        initHandlerMappings();
+    }
+
+    private void initHandlerMappings() {
+        requestMappingInfoHandlerMapping.registerMapping();
+    }
+
+    @Override
+    protected void doService(HttpServletRequest request, HttpServletResponse response) {
+        doDispatcher(request, response);
+
+    }
+
+    private void doDispatcher(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            //获得url
+            String requestUrl = request.getRequestURI();
+
+            //根据url获得具体的handler
+            DFHandlerExecutionChain handler = getHandler(requestUrl);
+            if (handler == null) {
+                noHandlerFound(request, response);
+                return;
+            }
+
+            //执行handler方法
+            DFModelAndView modelAndView = handler.handler();
+
+            processDispatchResult(modelAndView, request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void processDispatchResult(DFModelAndView view, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        render(view, request, response);
+    }
+
+    private void render(DFModelAndView view, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String viewName = view.getView();
+        request.getRequestDispatcher("/WEB-INF/pages/" + viewName + ".html").forward(request, response);
+    }
+
+    private void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        response.getWriter().println("404");
+    }
+
+    private DFHandlerExecutionChain getHandler(String requestUrl) {
+        DFHandlerMethod handlerMethod = requestMappingInfoHandlerMapping.getHandler(requestUrl);
+        if(handlerMethod == null)
+            return null;
+
+        DFHandlerExecutionChain handlerExecutionChain = new DFHandlerExecutionChain(handlerMethod);
+        return handlerExecutionChain;
+    }
+}
 ```
 
 5.创建相关注解类
+### 扫描包注解DFComponentScan
 ```shell script
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -788,6 +860,7 @@ public @interface DFComponentScan {
 }
 ```
 
+### 控制器DFController
 ```shell script
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -796,6 +869,7 @@ public @interface DFController {
 }
 ```
 
+### DFRequestMapping
 ```shell script
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -827,3 +901,153 @@ public class DFHandlerMethod {
     }
 }
 ```
+7.创建RequestMappingHandlerMapping,用于找出spring容器中被@Controller注解的bean以及被@RequestMapping注解修饰的类和方法
+>通过扫描包的路径,使用反射机制获取包范围的类,遍历类在类方法上查找是否含有@Controller注解,获取类上所有的方法,查找方法是否
+含有@RequestMapping的注解,然后获取RequestMapping中的URL地址,将URl与对应的方法关联在map中
+
+真正用于存储url与方法的类是RequestMappingInfoHandlerMapping
+```shell script
+public class DFRequestMappingInfoHandlerMapping {
+
+    private final Map<String, DFHandlerMethod> registerMap = new HashMap<>();
+
+    public void registerMapping() {
+        //获得扫包范围
+        DFComponentScan componentScan = MvcConfig.class.getDeclaredAnnotation(DFComponentScan.class);
+        if (componentScan == null) return;
+
+        String packageName = componentScan.value();
+        if (StringUtils.isEmpty(packageName)) return;
+
+        Set<Class<?>> clazz = ResourceLoader.getClass(packageName);
+
+        //遍历每个类 查找方法是否加@Controller
+        clazz.stream().forEach(item -> {
+            DFController controller = item.getAnnotation(DFController.class);
+            if (null == controller) {
+                return;
+            }
+
+            Method[] methods = item.getDeclaredMethods();
+            for (Method method : methods) {
+                DFRequestMapping requestMapping = method.getDeclaredAnnotation(DFRequestMapping.class);
+                if (requestMapping != null) {
+                    String url = requestMapping.value();
+                    registerMap.putIfAbsent(url, new DFHandlerMethod(newInstance(item), method));
+                }
+            }
+        });
+    }
+
+    public DFHandlerMethod getHandler(String url) {
+        return registerMap.get(url);
+    }
+
+    private Object newInstance(Class<?> clazz) {
+        Object obj = null;
+        try {
+            obj = clazz.newInstance();
+            return obj;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
+}
+```
+
+8.定义HandlerExecutionChain
+```shell script
+public class DFHandlerExecutionChain {
+
+    private DFHandlerMethod handlerMethod;
+
+    public DFHandlerExecutionChain(DFHandlerMethod handlerMethod) {
+        this.handlerMethod = handlerMethod;
+    }
+
+    public DFModelAndView handler() throws InvocationTargetException, IllegalAccessException {
+        Method method = handlerMethod.getMethod();
+        Object obj = handlerMethod.getBean();
+
+        Object viewName =  method.invoke(obj, null);
+        DFModelAndView modelAndView = new DFModelAndView((String)viewName);
+        return modelAndView;
+    }
+}
+```
+
+9.定义ModelAndView
+```shell script
+public class DFModelAndView {
+
+    private String view;
+
+    public DFModelAndView(String view) {
+        this.view = view;
+    }
+
+    public String getView() {
+        return view;
+    }
+}
+```
+
+10.定义IndexController
+```shell script
+@DFController
+public class IndexController {
+
+    @DFRequestMapping(value = "/index")
+    public String index(){
+        return "index";
+    }
+}
+```
+11.在/WEB-INF/pages目录下创建index.html
+```shell script
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello SpringMVC</title>
+</head>
+<body>
+
+   Hello SpringMVC!
+</body>
+</html>
+```
+
+12.编写配置类,其实就是一直在xml中的定义的扫描包
+类似于:
+```shell script
+    <context:component-scan base-package="com.java.tech.controller"/>
+```
+
+```shell script
+@DFComponentScan("com.java.tech.controller")
+public class MvcConfig {
+}
+```
+
+13.web.xml配置servelt
+```shell script
+<web-app>
+    <display-name>Archetype Created Web Application</display-name>
+
+    <servlet>
+        <servlet-name>mvc</servlet-name>
+        <servlet-class>com.java.tech.servlet.DFDispatcherServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>mvc</servlet-name>
+        <url-pattern>/index</url-pattern>
+    </servlet-mapping>
+</web-app>
+```
+
+14.启动tomcat服务 通过浏览器访问http://localhost:8080/index
+
+**说明本文有几个地方实现的不是太好 后续补充**
