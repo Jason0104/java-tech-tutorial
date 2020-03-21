@@ -16,6 +16,9 @@
         <module>maven</module>
         <module>spring</module>
         <module>springmvc</module>
+        <module>core-java</module>
+        <module>redis</module>
+        <module>zookeeper</module>
     </modules>
 
     <name>java-tech-tutorial</name>

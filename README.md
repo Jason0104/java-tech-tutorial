@@ -39,6 +39,10 @@
 * [Mysql实战到优化](#mysql)
 * [Linux命令](#linux)
 * [Nginx](#nginx)
+* [Core Java](#core java)
+   * 高并发
+   * 类加载器
+   * 泛型
 * [Redis实战](#redis)
 * [Zookeeper从入门到实战](#zookeeper)
 * [分布式技术方案](#distributed)
