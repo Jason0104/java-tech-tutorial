@@ -39,18 +39,20 @@
 * [Mysql实战到优化](#mysql)
 * [Linux命令](#linux)
 * [Nginx](#nginx)
-* [Core Java](#core java)
-   * 高并发
-   * 类加载器
-   * 泛型
+* [SprigBoot](#springboot)
 * [Redis实战](#redis)
 * [Zookeeper从入门到实战](#zookeeper)
 * [分布式技术方案](#distributed)
    * 单点登录
    * 分布式事务
+   * ElasticSearch
 * [Dubbo](#dubbo)
+* [Core Java](#core java)
+   * 高并发
+   * 类加载器
+   * 泛型
 * [Netty](#Netty)
-* [SprigBoot](#springboot)
 * [MQ技术深入分析](#MQ)
+* [JVM深入分析](#JVM)
 * [Docker](#docker)
 

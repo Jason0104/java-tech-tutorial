@@ -413,6 +413,11 @@ SELECT job FROM emp  WHERE ename="SCOTT")
 > 在分布式环境下,如何保证产生的ID不重复,Twitter提出来一个算法叫SnowFlake 中文命名雪花算法,其目的是生成一个64bit的整数
 能够在整个分布式系统内不会产生ID碰撞(由数据中心和机器ID做区分),并且效率高,每秒能够产生26万ID
 
+### 雪花算法
+雪花算法(snowflake)是Twitter开源的分布式ID生成算法，结果是一个long型的ID
+核心思想是：使用41bit作为毫秒数，10bit作为机器的ID（5个bit是数据中心，5个bit的机器ID），12bit作为毫秒内的流水号，最后还有一个符号位，永远是0.
+
+#### 下面是雪花算法的实现
 ```shell script
 public class SnowFlake {
 
