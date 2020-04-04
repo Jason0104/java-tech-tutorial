@@ -2,7 +2,7 @@
 
 ## 主要内容介绍
 * [什么是Nginx](#what's nginx)
-* [Nginx的安装部署](#install nginx)
+* [Nginx的安装部署](#nginx_installation)
 * [Nginx服务器架构](#nginx_arch)
 * [Nginx服务器高级配置](#nginx_config)
 * [Nginx代理服务](#nginx_proxy)
@@ -18,11 +18,11 @@
 - 邮件代理服务
 - Web缓存
 
-#### 正向代理&反向代理的区别?
+### 正向代理&反向代理的区别
 - 正向代理代理的是客户端, 比如通过浏览器->百度网站
 - 反向代理代理的是服务端, 比如浏览器访问->百度网站->新浪,阿里,网易网站
 
-##### 常见的web服务器
+### 常见的web服务器
 - Tomcat:动态的web服务器
 - Apache:静态的web服务器
 - IIS:是Microsoft公司的web服务器产品
@@ -45,7 +45,6 @@ brew install nginx
 2. ./configure --prefix=/usr/local/nginx   默认安装到/usr/local/nginx
 3. make & make install
 ```
-
 ### Linux安装
 ```shell script
 yum install nginx
@@ -59,19 +58,19 @@ yum install openssl-devel
 yum install zlib-devel
 ```
 
-##### Nginx启动
+### Nginx启动
 ```shell script
 service nginx start;//启动nginx
 ./nginx -c /usr/local/nginx/nginx/conf;//启动nginx
 ```
 
-##### Nginx平滑启动
+### Nginx平滑启动
 ```shell script
 service nginx reload;//重新加载nginx.conf
 ./nginx -s reload;
 ```
 
-##### Nginx停止
+### Nginx停止
 ```shell script
 service nginx stop;//停止
 ./nginx -s stop;
@@ -97,12 +96,12 @@ Nginx服务器结构大致分为:
 - 后端服务
 - 缓存
 
-
 Nginx进程模型分为Single和Master两种进程模型
 - Single模型为单进程式,具有较差的容错能力,不适合生产环境
 - Master模型即一个master进程+N个worker进程的工作方式
 
 ## Nginx服务器高级配置
+
 ### nginx服务器日志相关
 关于日志的配置格式:
 ```shell script
@@ -130,17 +129,15 @@ log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
 - $arg:请求参数
 - $request_method:请求方法
 
-
 ### nginx配置https证书
 ```shell script
 server  {
    listen  443;
    server_name   test.nginx.cn;
 
-   if    (  $host = $server_addr )  {
+   if($host = $server_addr){
        return 444;
    }
-
    ssl  on;
    ssl_certificate   /etc/nginx/2018_nginx.cn.crt;
    ssl_certificate_key  /etc/nginx/2018_nginx.cn.key;
@@ -174,7 +171,7 @@ server  {
     gzip_proxied any;
 ```
 
-## Nginx代理服务
+### Nginx代理服务
 nginx反向代理是通过proxy_pass来配置,可以是ip也可以是域名
 ```shell script
    upstream proxy_server{
@@ -193,7 +190,7 @@ nginx反向代理是通过proxy_pass来配置,可以是ip也可以是域名
     }
 ```
 
-## Nginx负载均衡的策略
+### Nginx负载均衡的策略
 - ip_hash:根据ip的hash值来做转发
 - 轮询机制:默认的方式
 - 权重:通过weight=6 数字越大 分配到服务器的几率越大
