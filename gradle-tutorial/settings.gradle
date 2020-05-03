@@ -1,0 +1,5 @@
+rootProject.name = 'gradle-tutorial'
+include 'gradle-facade'
+include 'gradle-service-impl'
+include 'web'
+
