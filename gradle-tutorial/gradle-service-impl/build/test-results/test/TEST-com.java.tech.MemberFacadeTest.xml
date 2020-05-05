@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.java.tech.MemberFacadeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2020-05-02T12:18:54" hostname="chenxiaiandeMBP" time="0.002">
-  <properties/>
-  <testcase name="testQueryMember" classname="com.java.tech.MemberFacadeTest" time="0.002"/>
-  <system-out><![CDATA[Hello Jason
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

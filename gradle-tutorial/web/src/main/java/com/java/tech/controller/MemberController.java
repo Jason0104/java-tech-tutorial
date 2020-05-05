@@ -13,13 +13,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class MemberController {
 
-    @Autowired
-    private MemberFacadeImpl memberFacade;
-
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
     @ResponseBody
     public String sayHello() {
-        memberFacade.sayHello("Jason");
         return "hello";
     }
 }

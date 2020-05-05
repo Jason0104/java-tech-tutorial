@@ -79,6 +79,11 @@ gradle clean
 ```shell script
 gradle build
 ```
+以debug模式编译项目
+```shell script
+ gradle build --debug
+```
+
 构建生成分析报告:
 ```shell script
 gradle build --scan
