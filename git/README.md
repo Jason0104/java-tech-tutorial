@@ -183,6 +183,46 @@ git clone git@github/test.git
 ```shell script
 git remote add origin git@github/test.git
 ```
+
+如果本地同时有两个远程仓库,想删除一个远程仓库:
+1.通过远程命令查看远程仓库
+```shell script
+git remote -v
+```
+得到下面两个远程仓库
+```shell script
+origin  git@github.com:Jason0104/java-tech-tutorial-.git (fetch)
+origin  git@github.com:Jason0104/java-tech-tutorial-.git (push)
+gorigin  git@gitee.com:Jason0104/java-tech-tutorial-.git (fetch)
+gorigin  git@gitee.com:Jason0104/java-tech-tutorial-.git (push)
+```
+2.删除其中一个远程仓库gorigin,可以通过下面的命令即可完成远程仓库的删除
+```shell script
+git remote rm gorigin
+```
+
+3.还有一种方式可以修改
+```shell script
+cd .git
+vim config
+```
+修改该文件内容:
+```shell script
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = false
+        logallrefupdates = true
+        ignorecase = true
+        precomposeunicode = true
+[remote "origin"]
+        url = git@github.com:Jason0104/java-tech-tutorial-.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+        remote = origin
+        merge = refs/heads/master
+```
+
 获取所有远程分支
 ```shell script
 git fetch

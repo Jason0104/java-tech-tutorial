@@ -40,6 +40,10 @@
 * [Linux命令](#linux)
 * [Nginx](#nginx)
 * [SprigBoot](#springboot)
+* [SprigCloud](#springcloud)
+* [Gradle从入门到实战](#gradle)
+* [Groovy从入门到实战](#groovy)
+* [算法及数据结构](#suanfa)
 * [Redis实战](#redis)
 * [Zookeeper从入门到实战](#zookeeper)
 * [分布式技术方案](#distributed)
@@ -47,7 +51,7 @@
    * 分布式事务
    * ElasticSearch
 * [Dubbo](#dubbo)
-* [Core Java](#core java)
+* [Core Java](#core-java)
    * 高并发
    * 类加载器
    * 泛型
