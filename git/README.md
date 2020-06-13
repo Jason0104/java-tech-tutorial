@@ -359,6 +359,11 @@ git reflog
 git log --help
 ```
 
+很多时候我们会发现虽然添加了.gitignore文件但是还是没有生效,这是因为缓存导致,通过下面的命令来清除git缓存
+```shell script
+git rm -r --cache .
+```
+
 ## 客户端工具介绍
 常用的Git客户端图形化工具很多:
 - Source Tree(http://www.sourcetreeapp.com/)

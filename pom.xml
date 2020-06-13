@@ -19,6 +19,8 @@
         <module>core-java</module>
         <module>redis</module>
         <module>zookeeper</module>
+        <module>elastic-search</module>
+        <module>springboot</module>
     </modules>
 
     <name>java-tech-tutorial</name>
