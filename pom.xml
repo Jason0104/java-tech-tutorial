@@ -21,6 +21,7 @@
         <module>zookeeper</module>
         <module>elastic-search</module>
         <module>springboot</module>
+        <module>mq/rocketmq</module>
     </modules>
 
     <name>java-tech-tutorial</name>
